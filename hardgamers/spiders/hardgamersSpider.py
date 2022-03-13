@@ -17,6 +17,8 @@ count = 8
 
 class ProxyServersPro(Item):
     image = Field()
+    image_urls = Field()
+    images = Field()
     title = Field()
     price = Field()
     brand = Field()
@@ -56,9 +58,14 @@ class ProxyServers(CrawlSpider):
     def parse_data(self, response):
         global count
         for post in response.css('article.product'):
+            # grab the URL of the cover image
+            raw_img = post.css('a ::attr(src)').get()
+            clean_img = []
+            clean_img.append(response.urljoin(raw_img))
             yield {
                 'title': post.css('h3::text').get(),
-                'brand': post.css('h4::text').get()
+                'brand': post.css('h4::text').get(),
+                'image_urls': clean_img
             }
         # yield Request('https://www.hardgamers.com.ar/stores/acuarioInsumos?page=2&limit=20&store=acuarioInsumos', callback=self.parse_data)
         next_page = response.css('a[aria-label=Next] ::attr(href)').get()
