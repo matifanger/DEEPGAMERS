@@ -2,6 +2,7 @@ from itertools import count
 import json
 import re
 import urllib
+import datetime
 from html.parser import HTMLParser
 from urllib.parse import urljoin
 
@@ -12,18 +13,15 @@ from scrapy.spiders import CrawlSpider
 from requests import Session
 
 
-count = 8
-
-
 class ProxyServersPro(Item):
     image = Field()
     image_urls = Field()
-    images = Field()
     title = Field()
     price = Field()
     brand = Field()
     store = Field()
-    productID = Field()
+    productURL = Field()
+    date = Field()
 
 
 class ProxyServers(CrawlSpider):
@@ -55,18 +53,32 @@ class ProxyServers(CrawlSpider):
 
         yield from response.follow_all(shops, self.parse_data)
 
+    def parse_data_product(self, response):
+        raw_img = response.css('.prod-details-img ::attr(src)').get()
+        clean_img = []
+        clean_img.append(response.urljoin(raw_img))
+
+        bad_price = response.css(
+            '.prod-details-price[itemprop=price] ::text').get(),
+        bad_price = str(bad_price)
+        good_price = re.sub('\s+', '', bad_price)
+        good_price = good_price.replace("('\\n", '')
+        good_price = good_price.replace("\\n',)", '')
+
+        yield {
+            'title': response.css('.prod-details-img ::attr(alt)').get(),
+            'price': good_price,
+            'store': response.css('.icon-brand ::attr(alt)').getall(),
+            'productURL': response.css('a.my-auto[target=_blank] ::attr(href)').re(r'.*[?]'),
+            'image_urls': clean_img,
+            'date': datetime.datetime.now()
+        }
+
     def parse_data(self, response):
-        global count
-        for post in response.css('article.product'):
-            # grab the URL of the cover image
-            raw_img = post.css('a ::attr(src)').get()
-            clean_img = []
-            clean_img.append(response.urljoin(raw_img))
-            yield {
-                'title': post.css('h3::text').get(),
-                'brand': post.css('h4::text').get(),
-                'image_urls': clean_img
-            }
+        products = response.css('article.product a::attr(href)').getall()
+        products = [k for k in products if 'https' not in k]
+        yield from response.follow_all(products, self.parse_data_product)
+
         # yield Request('https://www.hardgamers.com.ar/stores/acuarioInsumos?page=2&limit=20&store=acuarioInsumos', callback=self.parse_data)
         next_page = response.css('a[aria-label=Next] ::attr(href)').get()
 

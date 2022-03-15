@@ -19,6 +19,14 @@ NEWSPIDER_MODULE = 'hardgamers.spiders'
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
 
+ITEM_PIPELINES = {'hardgamers.pipelines.customImagePipeline': 1}
+
+IMAGES_STORE = "local_folder"
+MEDIA_ALLOW_REDIRECTS = True
+
+RETRY_HTTP_CODES = [429]
+
+
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
 
@@ -86,6 +94,3 @@ ROBOTSTXT_OBEY = True
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
-
-ITEM_PIPELINES = {'hardgamers.pipelines.customImagePipeline': 1}
-IMAGES_STORE = "local_folder"
