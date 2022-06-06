@@ -9,6 +9,9 @@
 
 from scrapy.pipelines.images import ImagesPipeline
 
+from itemadapter import ItemAdapter
+from scrapy.exceptions import DropItem
+
 
 class HardgamersPipeline:
     def process_item(self, item, spider):
@@ -18,3 +21,11 @@ class HardgamersPipeline:
 class customImagePipeline(ImagesPipeline):
     def file_path(self, request, response=None, info=None):
         return request.url.split('/')[-1]
+
+    def item_completed(self, results, item, info):
+        file_paths = [x['path'] for ok, x in results if ok]
+        if not file_paths:
+            raise DropItem("Item contains no files")
+        adapter = ItemAdapter(item)
+        adapter['file_paths'] = file_paths
+        return item

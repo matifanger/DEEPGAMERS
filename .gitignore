@@ -1,3 +1,5 @@
 *.json
 local_folder
-posts.json
+*/__pycache__/
+.gitignore
+hardgamers/spiders/__pycache__/*

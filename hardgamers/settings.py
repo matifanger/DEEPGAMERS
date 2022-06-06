@@ -20,6 +20,10 @@ NEWSPIDER_MODULE = 'hardgamers.spiders'
 ROBOTSTXT_OBEY = True
 
 ITEM_PIPELINES = {'hardgamers.pipelines.customImagePipeline': 1}
+DOWNLOADER_MIDDLEWARES = {
+    # 'hardgamers.middlewares.IgnoreDuplicates': 543,
+    'hardgamers.middlewares.IgnoreDuplicates': 543,
+}
 
 IMAGES_STORE = "local_folder"
 MEDIA_ALLOW_REDIRECTS = True
